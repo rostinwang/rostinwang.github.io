@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自動抽籤</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="left-column">
+            <h1>自動抽籤</h1>
+            <textarea id="nameList" placeholder="請輸入姓名，每行一個或用逗號分隔"></textarea>
+            <input type="number" id="numberToDraw" placeholder="要抽出的數量">
+            <div class="button-container">
+                <button onclick="drawNames()">抽籤</button>
+                <button onclick="exportToExcel()">匯出 Excel</button>
+                <button onclick="clearNames()">清除名字</button>
+                <button onclick="saveNames()">保存名單</button>
+                <input type="file" id="fileInput" style="display:none" onchange="loadNames(event)">
+                <button onclick="document.getElementById('fileInput').click()">加載名單</button>
+            </div>
+        </div>
+        <div class="right-column">
+            <h2>抽籤結果</h2>
+            <div id="result"></div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生作業繳交情形</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="date"], input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .assignments-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .assignment-container {
+            width: 32%;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .assignment-container input[type="text"] {
+            width: calc(100% - 80px);
+            display: inline-block;
+        }
+        .assignment-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .assignment-buttons button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .assignment-buttons button:hover {
+            background-color: #45a049;
+        }
+        .student-boxes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .student-box {
+            width: 45px;
+            height: 45px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 5px;
+            cursor: pointer;
+            background-color: lightgreen; /* 預設顏色，代表已繳交 */
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .student-box:hover {
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        .not-submitted {
+            background-color: lightcoral; /* 代表未繳交 */
+        }
+        .pending-correction {
+            background-color: lightyellow; /* 代表待訂正 */
+        }
+        .status-info {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .buttons button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 10px;
+        }
+        .buttons button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>學生作業繳交情形</h1>
+    <form id="student-form">
+        <div class="form-group">
+            <label for="date">日期:</label>
+            <input type="date" id="date" name="date" value="">
+        </div>
+        <div class="form-group">
+            <label>作業:</label>
+            <div id="assignments-container" class="assignments-wrapper">
+                <div class="assignment-container" id="assignment-1">
+                    <input type="text" name="assignment" placeholder="作業名稱">
+                    <div class="assignment-buttons">
+                        <button type="button" onclick="removeAssignment(this)">刪除</button>
+                        <button type="button" onclick="clearAssignment(this)">清除</button>
+                    </div>
+                    <div class="student-boxes"></div>
+                    <div class="status-info"></div>
+                </div>
+            </div>
+        </div>
+        <button type="button" onclick="addAssignment()">新增作業</button>
+    </form>
+    <div class="buttons">
+        <button type="button" onclick="exportToExcel()">匯出Excel</button>
+        <button type="button" onclick="exportToPNG()">匯出圖片</button>
+        <button type="button" onclick="clearStatus()">清除</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.3.2/dist/html2canvas.min.js"></script>
+    <script>
+        document.getElementById('date').valueAsDate = new Date();
+
+        function addAssignment() {
+            const container = document.getElementById('assignments-container');
+            const assignmentContainers = container.getElementsByClassName('assignment-container');
+            const newAssignmentId = assignmentContainers.length + 1;
+
+            const assignmentDiv = document.createElement('div');
+            assignmentDiv.className = 'assignment-container';
+            assignmentDiv.id = `assignment-${newAssignmentId}`;
+            assignmentDiv.innerHTML = `
+                <input type="text" name="assignment" placeholder="作業名稱">
+                <div class="assignment-buttons">
+                    <button type="button" onclick="removeAssignment(this)">刪除</button>
+                    <button type="button" onclick="clearAssignment(this)">清除</button>
+                </div>
+                <div class="student-boxes"></div>
+                <div class="status-info"></div>
+            `;
+
+            container.appendChild(assignmentDiv);
+            generateStudentBoxes(assignmentDiv.querySelector('.student-boxes'));
+        }
+
+        function removeAssignment(button) {
+            const assignmentDiv = button.parentNode.parentNode;
+            assignmentDiv.remove();
+        }
+
+        function clearAssignment(button) {
+            const assignmentDiv = button.parentNode.parentNode;
+            const studentBoxes = assignmentDiv.querySelector('.student-boxes').children;
+            for (let i = 0; i < studentBoxes.length; i++) {
+                const box = studentBoxes[i];
+                box.classList.remove('not-submitted', 'pending-correction');
+            }
+            updateStatusInfo();
+            saveStatus();
+        }
+
+        function generateStudentBoxes(container) {
+            container.innerHTML = ''; // 清空之前生成的方塊
+
+            for (let i = 1; i <= 30; i++) {
+                const box = document.createElement('div');
+                box.className = 'student-box';
+                box.textContent = i;
+                box.addEventListener('click', toggleSubmissionStatus);
+                container.appendChild(box);
+            }
+        }
+
+        function toggleSubmissionStatus(event) {
+            const box = event.target.closest('.student-box');
+            if (box.classList.contains('not-submitted')) {
+                box.classList.remove('not-submitted');
+                box.classList.add('pending-correction');
+            } else if (box.classList.contains('pending-correction')) {
+                box.classList.remove('pending-correction');
+            } else {
+                box.classList.add('not-submitted');
+            }
+            updateStatusInfo();
+            saveStatus();
+        }
+
+        function updateStatusInfo() {
+            const assignmentContainers = document.getElementsByClassName('assignment-container');
+
+            for (let i = 0; i < assignmentContainers.length; i++) {
+                const assignmentContainer = assignmentContainers[i];
+                const assignmentName = assignmentContainer.querySelector('input[name="assignment"]').value;
+                const studentBoxes = assignmentContainer.querySelectorAll('.student-box');
+                let notSubmitted = [];
+                let pendingCorrection = [];
+
+                studentBoxes.forEach(box => {
+                    if (box.classList.contains('not-submitted')) {
+                        notSubmitted.push(box.textContent);
+                    } else if (box.classList.contains('pending-correction')) {
+                        pendingCorrection.push(box.textContent);
+                    }
+                });
+
+                const statusInfo = assignmentContainer.querySelector('.status-info');
+                statusInfo.innerHTML = `<strong>${assignmentName}</strong><br>未繳交的座號: ${notSubmitted.join('、')}<br>待訂正座號: ${pendingCorrection.join('、')}`;
+            }
+        }
+
+        function saveStatus() {
+            const assignmentContainers = document.getElementsByClassName('assignment-container');
+            let statuses = [];
+
+            for (let i = 0; i < assignmentContainers.length; i++) {
+                const assignmentContainer = assignmentContainers[i];
+                const assignmentName = assignmentContainer.querySelector('input[name="assignment"]').value;
+                const studentBoxes = assignmentContainer.querySelectorAll('.student-box');
+
+                let assignmentStatus = {
+                    name: assignmentName,
+                    students: []
+                };
+
+                studentBoxes.forEach((box, index) => {
+                    let status = '已繳交';
+                    if (box.classList.contains('not-submitted')) {
+                        status = '未繳交';
+                    } else if (box.classList.contains('pending-correction')) {
+                        status = '待訂正';
+                    }
+                    assignmentStatus.students.push({
+                        id: index + 1,
+                        status: status
+                    });
+                });
+
+                statuses.push(assignmentStatus);
+            }
+
+            localStorage.setItem('assignmentStatuses', JSON.stringify(statuses));
+        }
+
+        function loadStatus() {
+            const statuses = JSON.parse(localStorage.getItem('assignmentStatuses')) || [];
+
+            statuses.forEach(status => {
+                addAssignment();
+                const assignmentContainers = document.getElementsByClassName('assignment-container');
+                const assignmentContainer = assignmentContainers[assignmentContainers.length - 1];
+                assignmentContainer.querySelector('input[name="assignment"]').value = status.name;
+                const studentBoxes = assignmentContainer.querySelectorAll('.student-box');
+
+                status.students.forEach((studentStatus, index) => {
+                    const box = studentBoxes[index];
+                    box.classList.remove('not-submitted', 'pending-correction');
+                    if (studentStatus.status === '未繳交') {
+                        box.classList.add('not-submitted');
+                    } else if (studentStatus.status === '待訂正') {
+                        box.classList.add('pending-correction');
+                    }
+                });
+            });
+        }
+
+        function clearStatus() {
+            localStorage.removeItem('assignmentStatuses');
+            document.getElementById('date').valueAsDate = new Date();
+            document.getElementById('assignments-container').innerHTML = `
+                <div class="assignment-container" id="assignment-1">
+                    <input type="text" name="assignment" placeholder="作業名稱">
+                    <div class="assignment-buttons">
+                        <button type="button" onclick="removeAssignment(this)">刪除</button>
+                        <button type="button" onclick="clearAssignment(this)">清除</button>
+                    </div>
+                    <div class="student-boxes"></div>
+                    <div class="status-info"></div>
+                </div>
+            `;
+            generateStudentBoxes(document.getElementById('assignment-1').querySelector('.student-boxes'));
+        }
+
+        function exportToExcel() {
+            const date = document.getElementById('date').value;
+            const assignmentContainers = document.getElementsByClassName('assignment-container');
+            let data = [['日期', date], ['座號']];
+
+            for (let i = 1; i <= 30; i++) {
+                data.push([i]);
+            }
+
+            for (let i = 0; i < assignmentContainers.length; i++) {
+                const assignmentContainer = assignmentContainers[i];
+                const assignmentName = assignmentContainer.querySelector('input[name="assignment"]').value;
+                const studentBoxes = assignmentContainer.querySelectorAll('.student-box');
+                data[1].push(assignmentName);
+
+                for (let j = 0; j < studentBoxes.length; j++) {
+                    const box = studentBoxes[j];
+                    let status = '已繳交';
+                    if (box.classList.contains('not-submitted')) {
+                        status = '未繳交';
+                    } else if (box.classList.contains('pending-correction')) {
+                        status = '待訂正';
+                    }
+                    data[j + 2].push(status);
+                }
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '作業狀況');
+            XLSX.writeFile(wb, `作業狀況_${date}.xlsx`);
+        }
+
+        function exportToPNG() {
+            const date = document.getElementById('date').value;
+            const element = document.body;
+
+            html2canvas(element).then(function(canvas) {
+                const link = document.createElement('a');
+                link.download = `作業狀況_${date}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        // 自動生成第一組作業的座號方塊
+        window.onload = function() {
+            generateStudentBoxes(document.getElementById('assignment-1').querySelector('.student-boxes'));
+            loadStatus();
+        };
+    </script>
+</body>
+</html>

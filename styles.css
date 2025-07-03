@@ -1,57 +1,157 @@
+/* 基本樣式和字體 */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    font-family: 'Roboto', Arial, sans-serif; /* 使用 Roboto 字體 */
+    background-color: #f0f4f8; /* 淺藍灰色背景 */
     margin: 0;
     padding: 0;
+    color: #333;
+    display: flex;
+    flex-direction: column; /* 讓 header, main, footer 垂直堆疊 */
+    min-height: 100vh; /* 確保 body 至少佔滿整個視窗高度 */
 }
 
+/* Header 樣式 */
 header {
-    background-color: #4CAF50;
+    background-color: #326a97; /* 深藍色 */
     color: white;
     text-align: center;
-    padding: 1em 0;
+    padding: 1.5em 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: 700; /* 更粗的標題字體 */
+}
+
+/* Main 內容區塊 */
 main {
+    flex-grow: 1; /* 讓 main 區塊佔據剩餘空間，推擠 footer */
     display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    padding: 2em;
+    justify-content: center; /* 水平居中卡片組 */
+    flex-wrap: wrap; /* 允許卡片換行 */
+    padding: 2.5em 1.5em; /* 增加內邊距 */
+    gap: 25px; /* 卡片間距 */
 }
 
+/* 卡片設計 */
 .card {
     background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin: 1em;
-    padding: 2em;
+    border-radius: 15px; /* 更大的圓角 */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* 更柔和的陰影 */
+    margin: 1em; /* 為兼容舊瀏覽器保留 margin，但主要使用 gap */
+    padding: 2.5em;
     text-align: center;
-    width: 300px;
+    width: 320px; /* 固定寬度，但在響應式設計中會調整 */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* 增加過渡效果 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 內容上下推開 */
+}
+
+.card:hover {
+    transform: translateY(-8px); /* 向上浮動效果 */
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15); /* 懸停時陰影更深 */
 }
 
 .card h2 {
     margin-top: 0;
+    color: #326a97; /* 與 header 呼應的藍色 */
+    font-size: 1.8em;
+    font-weight: 600;
+    margin-bottom: 0.8em;
 }
 
+.card p {
+    color: #555;
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin-bottom: 1.5em;
+    flex-grow: 1; /* 讓段落內容佔據空間，推開按鈕 */
+}
+
+/* 按鈕樣式 */
 .button {
-    background-color: #4CAF50;
+    background-color: #007bff; /* 現代藍色 */
     color: white;
-    padding: 1em 2em;
+    padding: 1em 2.2em; /* 調整內邊距 */
     text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+    border-radius: 8px; /* 更圓潤的按鈕 */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    display: inline-block; /* 確保 padding 和 margin 正確應用 */
+    font-weight: 500; /* 適中的字體粗細 */
+    font-size: 1.1em;
 }
 
 .button:hover {
-    background-color: #45a049;
+    background-color: #0056b3; /* 懸停時顏色更深 */
+    transform: translateY(-2px); /* 輕微上浮 */
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3); /* 懸停時的陰影 */
 }
 
+/* Footer 樣式 */
 footer {
-    background-color: #4CAF50;
+    background-color: #326a97; /* 與 header 相同的深藍色 */
     color: white;
     text-align: center;
-    padding: 1em 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+    padding: 1.2em 0;
+    font-size: 0.9em;
+    margin-top: auto; /* 讓 footer 被推到最底部 */
+}
+
+/* 響應式設計 (Media Queries) */
+
+/* 針對小螢幕 (例如手機，最大寬度 768px) */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2em;
+    }
+
+    main {
+        padding: 1.5em 1em;
+        gap: 20px;
+    }
+
+    .card {
+        width: 90%; /* 手機上卡片幾乎全寬 */
+        padding: 2em 1.5em;
+    }
+
+    .card h2 {
+        font-size: 1.6em;
+    }
+
+    .card p {
+        font-size: 1em;
+    }
+
+    .button {
+        padding: 0.8em 1.8em;
+        font-size: 1em;
+    }
+}
+
+/* 針對中等螢幕 (例如平板，最大寬度 1024px) */
+@media (min-width: 769px) and (max-width: 1200px) {
+    main {
+        padding: 2em;
+        gap: 30px;
+    }
+    .card {
+        width: calc(50% - 40px); /* 每行兩張卡片，考慮間距 */
+        max-width: 350px; /* 限制單張卡片最大寬度 */
+    }
+}
+
+/* 針對大螢幕 (最小寬度 1201px) */
+@media (min-width: 1201px) {
+    main {
+        padding: 3em;
+        gap: 35px;
+    }
+    .card {
+        width: calc(33.333% - 40px); /* 每行三張卡片，考慮間距 */
+        max-width: 380px;
+    }
 }
